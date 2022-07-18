@@ -1,0 +1,60 @@
+package com.androidpoet.cleanarchitecture.presentation.ui.nowPlaying
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.androidpoet.cleanarchitecture.commonui.material.MovieItem
+import com.androidpoet.cleanarchitecture.navigator.ComposeNavigator
+
+
+@Composable
+fun NowPlayingUi(
+    composeNavigator: ComposeNavigator,
+    viewModel: NowPlayingVM = hiltViewModel()
+) {
+
+    val state = viewModel.viewState.collectAsState()
+
+    Box(
+        Modifier.fillMaxSize()
+    ) {
+        when (state.value) {
+
+            is NowPlayingViewState.Loading -> {
+                CircularProgressIndicator(
+                    Modifier.align(Alignment.Center)
+                )
+            }
+
+            is NowPlayingViewState.ShowNowPlaying -> {
+
+                LazyColumn(
+                    Modifier.fillMaxSize()
+                ) {
+                    val coins = (state.value as NowPlayingViewState.ShowNowPlaying).nowPlayings
+                    items(coins) { nowPlaying ->
+                        MovieItem(
+                            uiLayerNowPlaying = nowPlaying,
+                            onItemClick = viewModel::navigateToDetail
+                        )
+                    }
+                }
+            }
+
+            is NowPlayingViewState.Error -> {
+                val message = (state.value as NowPlayingViewState.Error).message
+                Text(text = message)
+
+            }
+        }
+
+    }
+}
